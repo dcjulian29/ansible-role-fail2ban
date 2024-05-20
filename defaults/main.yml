@@ -1,0 +1,102 @@
+---
+fail2ban_actiond: { }
+# test:
+#   - section: INCLUDES
+#     option: before
+#     value: iptables-blocktype.conf
+#   - section: Definition
+#     option: actionstart
+#     value: >
+#       iptables -N fail2ban-<name>
+#       iptables -A fail2ban-<name> -j RETURN
+#       iptables -I <chain> -p <protocol> -m multiport --dports <port> -j fail2ban-<name>
+#   - section: Definition
+#     option: actionstop
+#     value: >
+#       iptables -D <chain> -p <protocol> -m multiport --dports <port> -j fail2ban-<name>
+#   - section: Definition
+#     option: actioncheck
+#     value: >
+#       iptables -n -L <chain> | grep -a 'fail2ban-<name>[ \t]'
+#   - section: Definition
+#     option: actionban
+#     value: >
+#       iptables -I fail2ban-<name> 1 -s <ip> -j <blocktype>
+#   - section: Definition
+#     option: actionunban
+#     value: >-
+#       iptables -D fail2ban-<name> -s <ip> -j <blocktype>
+#   - section: Init
+#     option: name
+#     value: default
+#   - section: Init
+#     option: port
+#     value: ssh
+#   - section: Init
+#     option: protocol
+#     value: tcp
+#   - section: Init
+#     option: chain
+#     value: INPUT
+fail2ban_bantime: 600
+fail2ban_configuration: []
+#  - section: Definition
+#    option: loglevel
+#    value: "INFO"
+fail2ban_destemail: root@localhost
+fail2ban_filterd: { }
+# test1:
+#   - section: Definition
+#     option: pat1
+#     value: (linux-gnu)|wget|Wget
+#   - section: Definition
+#     option: pat2
+#     value: ^<HOST>.*GET.*(?i)ls.*
+#   - section: Definition
+#     option: failregex
+#     value: ^%(pat1)-%(pat2)$
+#   - section: Definition
+#     option: ignoreregex
+#     value: ""
+# test2:
+#   - section: Definition
+#     option: failregex
+#     value: ^.*DROP_.*SRC=<ADDR> DST=.*$
+#   - section: Definition
+#     option: journalmatch
+#     value: _TRANSPORT=kernel
+fail2ban_findtime: 600
+fail2ban_ignoreips:
+  - "127.0.0.1/8 ::1"
+fail2ban_ignoreself: "true"
+fail2ban_jail_configuration: []
+#  - section: DEFAULT
+#    option: ignoreself
+#    value: "true"
+fail2ban_jaild: { }
+# test:
+#   - section: sshd
+#     option: enabled
+#     value: "true"
+#   - section: sshd
+#     option: port
+#     value: ssh
+#   - section: sshd
+#     option: banaction
+#     value: iptables
+#   - section: sshd
+#     option: logpath
+#     value: "%(sshd_log)s"
+#   - section: sshd
+#     option: maxretry
+#     value: 3
+#   - section: sshd
+#     option: findtime
+#     value: 1d
+#   - section: sshd
+#     option: bantime
+#     value: 2w
+fail2ban_loglevel: INFO
+fail2ban_logtarget: /var/log/fail2ban.log
+fail2ban_maxretry: 5
+fail2ban_sender: root@{{ ansible_fqdn }}

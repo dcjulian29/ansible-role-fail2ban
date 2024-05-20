@@ -1,0 +1,95 @@
+---
+- name: Include OS-specific variables.
+  ansible.builtin.include_vars: "{{ lookup('ansible.builtin.first_found', params) }}"
+  vars:
+    params:
+      files:
+        - "{{ ansible_distribution | lower }}.yml"
+        - "{{ ansible_os_family | lower }}.yml"
+      paths:
+        - vars
+
+- name: Install fail2ban
+  ansible.builtin.package:
+    name: "{{ item }}"
+    state: present
+  loop: "{{ fail2ban_packages }}"
+
+- name: Configure filters in filter.d
+  community.general.ini_file:
+    path: "/etc/fail2ban/filter.d/{{ item.0.key }}.conf"
+    section: "{{ item.1.section }}"
+    option: "{{ item.1.option }}"
+    value: "{{ item.1.value }}"
+    owner: root
+    group: root
+    mode: "0644"
+  loop: "{{ fail2ban_filterd | dict2items | subelements('value') }}"
+  loop_control:
+    label: "{{ item.1.option }}"
+
+- name: Configure actions in action.d
+  community.general.ini_file:
+    path: "/etc/fail2ban/action.d/{{ item.0.key }}.conf"
+    section: "{{ item.1.section }}"
+    option: "{{ item.1.option }}"
+    value: "{{ item.1.value }}"
+    owner: root
+    group: root
+    mode: "0644"
+  loop: "{{ fail2ban_actiond | dict2items | subelements('value') }}"
+  loop_control:
+    label: "{{ item.1.option }}"
+  notify:
+    - Restart fail2ban
+  when:
+    - fail2ban_actiond | length > 0
+
+- name: Configure jails in jail.d
+  community.general.ini_file:
+    path: "/etc/fail2ban/jail.d/{{ item.0.key }}.conf"
+    section: "{{ item.1.section }}"
+    option: "{{ item.1.option }}"
+    value: "{{ item.1.value }}"
+    owner: root
+    group: root
+    mode: "0644"
+  loop: "{{ fail2ban_jaild | dict2items | subelements('value') }}"
+  loop_control:
+    label: "{{ item.1.option }}"
+  notify:
+    - Restart fail2ban
+  when:
+    - fail2ban_jaild | length > 0
+
+- name: Configure fail2ban.local
+  community.general.ini_file:
+    path: /etc/fail2ban/fail2ban.local
+    section: "{{ item.section }}"
+    option: "{{ item.option }}"
+    value: "{{ item.value }}"
+    mode: "0644"
+  loop: "{{ fail2ban_base_configuration + fail2ban_configuration }}"
+  notify:
+    - Restart fail2ban
+  loop_control:
+    label: "{{ item.option }}"
+
+- name: Configure jail.local
+  community.general.ini_file:
+    path: /etc/fail2ban/jail.local
+    section: "{{ item.section }}"
+    option: "{{ item.option }}"
+    value: "{{ item.value }}"
+    mode: "0644"
+  loop: "{{ fail2ban_base_jail_configuration + fail2ban_jail_configuration }}"
+  notify:
+    - Restart fail2ban
+  loop_control:
+    label: "{{ item.option }}"
+
+- name: Start and enable fail2ban
+  ansible.builtin.service:
+    name: "{{ fail2ban_service }}"
+    state: started
+    enabled: true
