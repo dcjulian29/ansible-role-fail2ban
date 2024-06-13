@@ -27,6 +27,10 @@
   loop: "{{ fail2ban_filterd | dict2items | subelements('value') }}"
   loop_control:
     label: "{{ item.1.option }}"
+  notify:
+    - Restart fail2ban
+  when:
+    - fail2ban_filterd | length > 0
 
 - name: Configure actions in action.d
   community.general.ini_file:
