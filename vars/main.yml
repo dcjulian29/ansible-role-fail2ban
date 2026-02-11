@@ -28,4 +28,5 @@ fail2ban_base_jail_configuration:
   - option: sender
     value: "{{ fail2ban_sender }}"
     section: DEFAULT
+fail2ban_logtarget: /var/log/fail2ban.log
 fail2ban_service: fail2ban
